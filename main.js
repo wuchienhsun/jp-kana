@@ -221,7 +221,8 @@ function initKuromoji() {
   loading = true;
 
   // 使用 jsdelivr CDN 路徑
-  kuromoji.builder({ dicPath: 'https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/' }).build((err, _tokenizer) => {
+  const dicPath = new URL('https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/').toString();
+  kuromoji.builder({ dicPath }).build((err, _tokenizer) => {
     loading = false;
     if (err) {
       showStatus("詞典載入失敗: " + err, "error");
