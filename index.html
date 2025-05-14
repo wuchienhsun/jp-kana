@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>日文漢字自動標註平假名</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap">
+  <style>
+    :root {
+      --primary: #219ebc;
+      --primary-dark: #023047;
+      --secondary: #8ecae6;
+      --accent: #ffb703;
+      --accent-dark: #fb8500;
+      --light: #f8f9fa;
+      --dark: #023047;
+      --success: #38b000;
+      --warning: #ffb703;
+      --error: #fb8500;
+      --gray-100: #f8f9fa;
+      --gray-200: #e9ecef;
+      --gray-300: #dee2e6;
+      --gray-400: #ced4da;
+      --gray-500: #adb5bd;
+      --gray-600: #6c757d;
+      --gray-700: #495057;
+      --gray-800: #343a40;
+      --gray-900: #212529;
+      --border-radius: 8px;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      line-height: 1.6;
+      color: var(--dark);
+      background-color: var(--light);
+      padding: 0;
+      margin: 0;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+    
+    header {
+      background-color: var(--primary-dark);
+      color: white;
+      padding: 1.5rem 0;
+      text-align: center;
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+    }
+    
+    h1 {
+      font-weight: 700;
+      font-size: 1.8rem;
+      margin: 0;
+    }
+    
+    .card {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-top: 4px solid var(--primary);
+    }
+    
+    textarea {
+      width: 100%;
+      font-size: 1.1rem;
+      padding: 0.8rem;
+      border: 1px solid var(--gray-300);
+      border-radius: var(--border-radius);
+      min-height: 120px;
+      font-family: 'Noto Sans JP', sans-serif;
+      transition: var(--transition);
+      resize: vertical;
+      line-height: 1.8;
+      white-space: pre-wrap;
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(33, 158, 188, 0.3);
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 0.75rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: var(--border-radius);
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-dark);
+    }
+    
+    .btn-secondary {
+      background-color: var(--accent);
+      color: var(--dark);
+    }
+    
+    .btn-secondary:hover:not(:disabled) {
+      background-color: var(--accent-dark);
+      color: white;
+    }
+    
+    .status {
+      color: var(--gray-700);
+      font-style: italic;
+      margin: 0.5rem 0;
+      min-height: 24px;
+      font-size: 0.9rem;
+    }
+    
+    .result-container {
+      margin-top: 1.5rem;
+    }
+    
+    .result {
+      background: var(--gray-100);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      min-height: 50px;
+      border-left: 4px solid var(--secondary);
+      white-space: pre-line;
+    }
+    
+    .result p {
+      margin-bottom: 1.2em;
+    }
+    
+    .result ruby {
+      ruby-align: center;
+    }
+    
+    .result rt {
+      font-size: 0.6em;
+      color: var(--accent-dark);
+      font-weight: 500;
+    }
+    
+    pre {
+      background: var(--primary-dark);
+      color: var(--light);
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      overflow-x: auto;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+    }
+    
+    .tab-container {
+      margin-top: 1rem;
+    }
+    
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid var(--gray-300);
+    }
+    
+    .tab {
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+    
+    .tab.active {
+      border-bottom-color: var(--accent-dark);
+      color: var(--primary-dark);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .loading {
+      position: relative;
+    }
+    
+    .loading::after {
+      content: "...";
+      animation: dots 1.5s infinite;
+      display: inline-block;
+      width: 1.5em;
+      text-align: left;
+    }
+    
+    @keyframes dots {
+      0%, 20% { content: "."; }
+      40% { content: ".."; }
+      60%, 100% { content: "..."; }
+    }
+    
+    .success-message {
+      color: var(--success);
+      font-weight: 500;
+    }
+    
+    .error-message {
+      color: var(--error);
+      font-weight: 500;
+    }
+    
+    footer {
+      text-align: center;
+      padding: 1.5rem 0;
+      margin-top: 2rem;
+      color: var(--gray-600);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--gray-300);
+    }
+    
+    footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    footer a:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
+    }
+    
+    .examples {
+      margin-top: 1.5rem;
+      border-top: 1px solid var(--gray-300);
+      padding-top: 1rem;
+    }
+    
+    .examples h3 {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      color: var(--primary-dark);
+    }
+    
+    .example-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .example-btn {
+      padding: 0.5rem 0.75rem;
+      background-color: var(--secondary);
+      color: var(--dark);
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    .example-btn:hover {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    @media (max-width: 600px) {
+      .button-group {
+        flex-direction: column;
+      }
+      
+      button {
+        width: 100%;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>日文漢字自動標註平假名</h1>
+  </header>
+  
+  <div class="container">
+    <div class="card">
+      <textarea id="input" rows="6" placeholder="在此貼上日文文章..."></textarea>
+      <div class="button-group">
+        <button id="convert" class="btn-primary" disabled>產生帶假名的 HTML</button>
+        <button id="copy" class="btn-secondary" disabled>複製 HTML</button>
+      </div>
+      <div id="status" class="status">載入中...</div>
+      
+      <div class="examples">
+        <h3>常見詞彙測試</h3>
+        <div class="example-buttons">
+          <button class="example-btn" data-text="組める">組める</button>
+          <button class="example-btn" data-text="過ごし方">過ごし方</button>
+          <button class="example-btn" data-text="行きました">行きました</button>
+          <button class="example-btn" data-text="お久しぶりです">お久しぶりです</button>
+          <button class="example-btn" data-text="勉強しています">勉強しています</button>
+        </div>
+        <h3>特殊詞彙測試</h3>
+        <div class="example-buttons">
+          <button class="example-btn" data-text="4ヶ月">4ヶ月</button>
+          <button class="example-btn" data-text="3ヶ所">3ヶ所</button>
+          <button class="example-btn" data-text="5ヶ国">5ヶ国</button>
+        </div>
+        <h3>數字計數詞</h3>
+        <div class="example-buttons">
+          <button class="example-btn" data-text="一人">一人</button>
+          <button class="example-btn" data-text="二冊">二冊</button>
+          <button class="example-btn" data-text="三枚">三枚</button>
+          <button class="example-btn" data-text="十回">十回</button>
+        </div>
+        <h3>短文範例</h3>
+        <div class="example-buttons">
+          <button class="example-btn" data-text="私は東京に住んでいます。">私は東京に住んでいます</button>
+          <button class="example-btn" data-text="日本語を勉強しています。">日本語を勉強しています</button>
+          <button class="example-btn" data-text="明日は雨が降るでしょう。">明日は雨が降るでしょう</button>
+        </div>
+        <h3>段落範例</h3>
+        <div class="example-buttons">
+          <button class="example-btn" data-text="日本語は面白いです。\n漢字を勉強するのは大変ですが、役に立ちます。\n\n頑張りましょう！">段落範例1</button>
+          <button class="example-btn" data-text="東京は日本の首都です。\n人口が多くて、交通が便利です。\n\n四季があって、桜の季節が特に美しいです。">段落範例2</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="result-container">
+      <div class="tabs">
+        <div class="tab active" data-tab="preview">預覽</div>
+        <div class="tab" data-tab="code">HTML 代碼</div>
+      </div>
+      
+      <div class="tab-content active" id="preview-content">
+        <div class="result" id="rubyResult"></div>
+      </div>
+      
+      <div class="tab-content" id="code-content">
+        <pre id="htmlResult"></pre>
+      </div>
+    </div>
+  </div>
+  
+  <footer>
+    <p>使用 <a href="https://github.com/takuyaa/kuromoji.js" target="_blank">kuromoji.js</a> 實現 | <a href="https://github.com/benwu/jp-kana" target="_blank">GitHub</a></p>
+  </footer>
+  
+  <script src="https://unpkg.com/kuromoji@0.1.2/build/kuromoji.js"></script>
+  <script src="main.js"></script>
+</body>
+</html> 
