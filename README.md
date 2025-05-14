@@ -18,6 +18,7 @@
 
 - 純前端 JavaScript
 - [kuromoji.js](https://github.com/takuyaa/kuromoji.js/) - 日文形態素解析器
+- 本地字典檔案 - 避免跨域問題和 CDN 依賴
 - GitHub Pages 部署
 
 ## 本地運行
@@ -28,6 +29,25 @@
    python -m http.server
    ```
 3. 在瀏覽器中訪問 `http://localhost:8000`
+
+## 關於字典檔案
+
+本項目使用 kuromoji.js 的字典檔案，這些檔案已經下載到 `dict/` 目錄中：
+
+- base.dat.gz
+- cc.dat.gz
+- check.dat.gz
+- tid.dat.gz
+- tid_map.dat.gz
+- tid_pos.dat.gz
+- unk.dat.gz
+- unk_char.dat.gz
+- unk_compat.dat.gz
+- unk_invoke.dat.gz
+- unk_map.dat.gz
+- unk_pos.dat.gz
+
+使用本地字典檔案可以避免跨域問題和 CDN 依賴，確保應用在 GitHub Pages 等環境中正常運行。
 
 ## 部署到 GitHub Pages
 

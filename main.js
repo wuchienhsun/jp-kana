@@ -212,16 +212,16 @@ function processToken(token) {
 
 // 載入 kuromoji 詞典
 function initKuromoji() {
-  if (typeof kuromoji === 'undefined') {
-    showStatus("kuromoji 載入失敗，請重新整理頁面", "error");
-    return;
-  }
+  // if (typeof kuromoji === 'undefined') {
+  //   showStatus("kuromoji 載入失敗，請重新整理頁面", "error");
+  //   return;
+  // }
 
   showStatus("載入詞典中...", "loading");
   loading = true;
 
-  // 使用 jsdelivr CDN 路徑
-  const dicPath = new URL('https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/').toString();
+  // 使用本地字典檔案
+  const dicPath = './dict/';
   kuromoji.builder({ dicPath }).build((err, _tokenizer) => {
     loading = false;
     if (err) {
