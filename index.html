@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>日文漢字自動標註平假名</title>
+  <title>日文工具箱</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap">
   <style>
@@ -59,12 +59,26 @@
       text-align: center;
       box-shadow: var(--shadow);
       margin-bottom: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+    
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      right: 0;
+      height: 10px;
+      background: linear-gradient(rgba(0, 0, 0, 0.1), transparent);
+      z-index: -1;
     }
     
     h1 {
       font-weight: 700;
       font-size: 1.8rem;
       margin: 0;
+      margin-bottom: 1rem;
     }
     
     .card {
@@ -314,24 +328,155 @@
         font-size: 1.5rem;
       }
     }
+    
+    .nav-tabs {
+      display: flex;
+      border-bottom: 2px solid var(--gray-300);
+      margin-bottom: 2rem;
+    }
+
+    .nav-tab {
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      font-weight: 500;
+      transition: var(--transition);
+      color: var(--gray-600);
+      text-decoration: none;
+    }
+
+    .nav-tab.active {
+      border-bottom-color: var(--accent-dark);
+      color: #f8f9fa;
+    }
+
+    .nav-tab:hover {
+      color: var(--primary-dark);
+    }
+
+    .button-wrapper {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .textarea-wrapper {
+      position: relative;
+      flex-grow: 1;
+    }
+
+    .paste-button {
+      position: absolute;
+      right: 0.5rem;
+      top: 0.5rem;
+      background: var(--gray-200);
+      color: var(--gray-700);
+      border: none;
+      border-radius: 4px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      padding: 0 0.75rem;
+      font-size: 0.9rem;
+      gap: 0.25rem;
+    }
+
+    .paste-button:hover {
+      background: var(--gray-300);
+      color: var(--gray-900);
+    }
+
+    textarea {
+      padding-right: 120px; /* 為貼上按鈕預留更多空間 */
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin: 0.5rem 0 1rem;
+    }
+
+    .icon-button {
+      background: var(--gray-200);
+      border: none;
+      border-radius: 4px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--gray-700);
+      padding: 0 0.75rem;
+      font-size: 0.9rem;
+      gap: 0.25rem;
+    }
+
+    .icon-button:hover {
+      background: var(--gray-300);
+      color: var(--gray-900);
+    }
+
+    .icon-button svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .copy-status {
+      font-size: 0.8rem;
+      color: var(--success);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      margin-left: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .copy-status.show {
+      opacity: 1;
+    }
+
+    textarea {
+      width: 100%;
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1>日文漢字自動標註平假名</h1>
+    <div class="container">
+      <h1>日本語ツールボックス</h1>
+      <div class="nav-tabs">
+        <a href="index.html" class="nav-tab active">ふりがな付けツール</a>
+        <a href="ruby-converter.html" class="nav-tab">ルビ変換ツール</a>
+      </div>
+    </div>
   </header>
   
   <div class="container">
     <div class="card">
-      <textarea id="input" rows="6" placeholder="在此貼上日文文章..."></textarea>
-      <div class="button-group">
-        <button id="convert" class="btn-primary" disabled>產生帶假名的 HTML</button>
-        <button id="copy" class="btn-secondary" disabled>複製 HTML</button>
+      <div class="button-wrapper">
+        <div class="textarea-wrapper">
+          <textarea id="input" rows="6" placeholder="日本語の文章をここに貼り付けてください..."></textarea>
+          <button id="pasteBtn" class="paste-button" title="クリップボードから貼り付け">
+            貼り付け
+          </button>
+        </div>
       </div>
-      <div id="status" class="status">載入中...</div>
+
+      <div class="button-group">
+        <button id="convert" class="btn-primary" disabled>ふりがな付きHTMLを生成</button>
+        <button id="copy" class="btn-secondary" disabled>HTMLをコピー</button>
+      </div>
+      <div id="status" class="status">読み込み中...</div>
+      <div id="copyStatus" class="copy-status"></div>
       
       <div class="examples">
-        <h3>常見詞彙測試</h3>
+        <h3>一般的な単語テスト</h3>
         <div class="example-buttons">
           <button class="example-btn" data-text="組める">組める</button>
           <button class="example-btn" data-text="過ごし方">過ごし方</button>
@@ -339,26 +484,26 @@
           <button class="example-btn" data-text="お久しぶりです">お久しぶりです</button>
           <button class="example-btn" data-text="勉強しています">勉強しています</button>
         </div>
-        <h3>特殊詞彙測試</h3>
+        <h3>特殊な単語テスト</h3>
         <div class="example-buttons">
           <button class="example-btn" data-text="4ヶ月">4ヶ月</button>
           <button class="example-btn" data-text="3ヶ所">3ヶ所</button>
           <button class="example-btn" data-text="5ヶ国">5ヶ国</button>
         </div>
-        <h3>數字計數詞</h3>
+        <h3>数字と助数詞</h3>
         <div class="example-buttons">
           <button class="example-btn" data-text="一人">一人</button>
           <button class="example-btn" data-text="二冊">二冊</button>
           <button class="example-btn" data-text="三枚">三枚</button>
           <button class="example-btn" data-text="十回">十回</button>
         </div>
-        <h3>短文範例</h3>
+        <h3>短文例</h3>
         <div class="example-buttons">
           <button class="example-btn" data-text="私は東京に住んでいます。">私は東京に住んでいます</button>
           <button class="example-btn" data-text="日本語を勉強しています。">日本語を勉強しています</button>
           <button class="example-btn" data-text="明日は雨が降るでしょう。">明日は雨が降るでしょう</button>
         </div>
-        <h3>段落範例</h3>
+        <h3>段落例</h3>
         <div class="example-buttons">
           <button class="example-btn" data-text="日本語は面白いです。\n漢字を勉強するのは大変ですが、役に立ちます。\n\n頑張りましょう！">段落範例1</button>
           <button class="example-btn" data-text="東京は日本の首都です。\n人口が多くて、交通が便利です。\n\n四季があって、桜の季節が特に美しいです。">段落範例2</button>
@@ -368,8 +513,8 @@
     
     <div class="result-container">
       <div class="tabs">
-        <div class="tab active" data-tab="preview">預覽</div>
-        <div class="tab" data-tab="code">HTML 代碼</div>
+        <div class="tab active" data-tab="preview">プレビュー</div>
+        <div class="tab" data-tab="code">HTMLコード</div>
       </div>
       
       <div class="tab-content active" id="preview-content">
@@ -383,10 +528,40 @@
   </div>
   
   <footer>
-    <p>使用 <a href="https://github.com/takuyaa/kuromoji.js" target="_blank">kuromoji.js</a> 實現 | <a href="https://github.com/benwu/jp-kana" target="_blank">GitHub</a></p>
+    <p><a href="https://github.com/takuyaa/kuromoji.js" target="_blank">kuromoji.js</a>を使用 | <a href="https://github.com/benwu/jp-kana" target="_blank">GitHub</a></p>
   </footer>
   
   <script src="https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js"></script>
   <script src="main.js"></script>
+  <script>
+    // 複製ボタンの機能
+    document.getElementById('copy').addEventListener('click', async function() {
+      const htmlResult = document.getElementById('htmlResult').textContent;
+      try {
+        await navigator.clipboard.writeText(htmlResult);
+        const copyStatus = document.getElementById('copyStatus');
+        copyStatus.textContent = 'コピーしました！';
+        copyStatus.classList.add('show');
+        setTimeout(() => {
+          copyStatus.classList.remove('show');
+        }, 2000);
+      } catch (err) {
+        console.error('コピーに失敗しました:', err);
+      }
+    });
+
+    // 貼り付けボタンの機能
+    document.getElementById('pasteBtn').addEventListener('click', async function() {
+      try {
+        const text = await navigator.clipboard.readText();
+        const input = document.getElementById('input');
+        input.value = text;
+        // 入力があったことをトリガー
+        input.dispatchEvent(new Event('input'));
+      } catch (err) {
+        console.error('貼り付けに失敗しました:', err);
+      }
+    });
+  </script>
 </body>
 </html> 
