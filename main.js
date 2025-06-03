@@ -49,8 +49,36 @@ function processToken(token) {
   const reading = katakanaToHiragana(token.reading);
 
   // 特殊處理「日本」，強制使用「にほん」讀音
-  if (surface === '日本') {
-    return `<ruby>${surface}<rt>にほん</rt></ruby>`;
+  // 檢查完整詞彙或詞彙的開頭是否為「日本」
+  if (surface === '日本' || surface.startsWith('日本')) {
+  // 如果是完整的「日本」詞彙
+    if (surface === '日本') {
+      return `<ruby>${surface}<rt>にほん</rt></ruby>`;
+    }
+    // 如果「日本」只是詞彙的一部分（如「日本の」「日本人」等）
+    else {
+      const prefix = '日本';
+      const suffix = surface.substring(2); // 取得「日本」之後的部分
+
+      // 為「日本」部分添加讀音
+      const prefixWithRuby = `<ruby>${prefix}<rt>にほん</rt></ruby>`;
+
+      // 處理剩餘部分
+      const suffixReading = reading.substring(3); // 「にほん」之後的讀音
+
+      // 如果剩餘部分是假名，直接添加
+      if (suffix.split('').every(char => isHiragana(char) || isKatakana(char))) {
+        return prefixWithRuby + suffix;
+      }
+      // 否則遞迴處理剩餘部分
+      else {
+        const suffixToken = {
+          surface_form: suffix,
+          reading: suffixReading
+        };
+        return prefixWithRuby + processToken(suffixToken);
+      }
+    }
   }
 
   // 特殊處理「日本語」，強制使用「にほんご」讀音
