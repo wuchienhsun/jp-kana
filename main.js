@@ -48,6 +48,16 @@ function processToken(token) {
   const surface = token.surface_form;
   const reading = katakanaToHiragana(token.reading);
 
+  // 特殊處理「日本」，強制使用「にほん」讀音
+  if (surface === '日本') {
+    return `<ruby>${surface}<rt>にほん</rt></ruby>`;
+  }
+
+  // 特殊處理「日本語」，強制使用「にほんご」讀音
+  if (surface === '日本語') {
+    return `<ruby>${surface}<rt>にほんご</rt></ruby>`;
+  }
+
   // 特殊處理數字+計數詞組合 (如 一人、二人、三冊 等)
   if (surface.length >= 2) {
     const firstChar = surface.charAt(0);
